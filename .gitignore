@@ -1,0 +1,17 @@
+*.idea
+*.swo
+*.swp
+*.pyc
+venv
+activate
+build/
+dist/
+__pycache__/
+.cache/
+.eggs/
+*.egg-info
+
+# app
+tautbot.ini
+tautbot.log
+#tautbot.logging.ini
