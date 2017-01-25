@@ -1,7 +1,9 @@
 import time
+
 from slackclient import SlackClient
-from tautbot.trivia import Trivia
+
 from tautbot.config import conf
+from tautbot.plugin import plugin_registry
 
 EXAMPLE_COMMAND = "do"
 
@@ -99,9 +101,13 @@ if __name__ == "__main__":
 
     # instantiate Slack & Twilio clients
     slack_client = SlackClient(conf['slack_bot_token'])
-    trivia = Trivia()
+
+    plugin_registry.register_plugin_list(['Trivia'])
+    trivia = plugin_registry.commands[0]['trivia']()
+
     tautbot = Tautbot(slack_client=slack_client, trivia=trivia)
 
+    # List
     channels = tautbot.list_channels()
 
     if channels:
@@ -112,7 +118,7 @@ if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1  # 1 second delay between reading from firehose
 
     if slack_client.rtm_connect():
-        print("StarterBot connected and running!")
+        print("tautbot connected and running!")
         while True:
             command, channel = tautbot.parse_slack_output(slack_client.rtm_read())
             if command and channel:
