@@ -50,6 +50,9 @@ instance = plugin_registry.instances['Hello']
 Event('channel_pattern_matched', _pattern, 'fake', 'ni!', 'ni!')
 #Event('channel_pattern_matched', _pattern, 'fake', 'ni!', 'ni!')
 
+print(plugin_registry.aliases)
+
+
 #
 #
 # class Room(Observer):

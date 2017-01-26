@@ -15,11 +15,10 @@ class Hello(PluginBase, Observer):
 
     def events(self, *args, **kwargs):
         print('registered events for: {}'.format(self.name))
-        self.observe('channel_pattern_matched', self.route_message)
+        self.observe('channel_pattern_matched', self.route_event)
 
-    def route_message(self, pattern, channel, text, output):
+    def route_event(self, pattern, channel, text, output):
         if re.match('^hello!$', pattern):
-            print('True')
             self.say_hello_world(channel)
         if re.match('^ni!$', pattern):
             self.say_ni(channel)

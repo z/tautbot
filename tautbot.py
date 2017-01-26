@@ -27,21 +27,24 @@ class Tautbot:
         if output_lines and len(output_lines) > 0:
             for output in output_lines:
 
-                if 'text' in output:
+                if output and 'text' in output:
                     patterns = '(?:({}))'.format('|'.join([p[0] for p in plugin_registry.patterns]))
                     _matches = re.match(patterns, output['text'])
                     _channel = output['channel']
 
                     Event('pre_parse_slack_output', output, _channel)
 
-                    if output and 'text' in output and _matches:
+                    if _matches:
                         _pattern = _matches.group(0)
                         Event('channel_pattern_matched', pattern=_pattern, channel=_channel, text=output['text'], output=output)
 
-                    elif output and 'text' in output and conf['at_bot'] in output['text']:
+                    elif conf['at_bot'] in output['text']:
                         # text after the @ mention, whitespace removed
                         _command = output['text'].split(conf['at_bot'])[1].strip().lower()
-                        Event('channel_command', command=_command, channel=_channel, text=output['text'], output=output)
+                        if _command in plugin_registry.commands:
+                            Event('channel_command', command=_command, channel=_channel, text=output['text'], output=output)
+                        elif _command in [p[0] for p in plugin_registry.aliases]:
+                            Event('channel_alias', command=_command, channel=_channel, text=output['text'], output=output)
 
     def list_channels(self):
         channels_call = self.slack_client.api_call("channels.list")
