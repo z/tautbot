@@ -11,24 +11,29 @@ from tautbot.slack import slack_client
 
 class Trivia(PluginBase, Observer):
     def __init__(self, command='trivia',
-                       aliases=(
-                          ('question', 'get_trivia_question'),
-                          ('answer', 'get_trivia_answer')
-                       )):
+                 subcommands=(
+                    ('question', 'get_trivia_question'),
+                    ('answer', 'get_trivia_answer')
+                 ),
+                 aliases=(
+                    ('question', 'get_trivia_question'),
+                    ('answer', 'get_trivia_answer')
+                 )):
         super(self.__class__, self).__init__(command=command, aliases=aliases)
         Observer.__init__(self)
         self.base_url = "http://jservice.io/api"
         self.current = None
 
     def events(self, *args, **kwargs):
+        print('registered events for: {}'.format(self.name))
         self.observe('pre_parse_slack_output', self.think)
         self.observe('channel_alias', self.route_event)
 
     def route_event(self, command, channel, text, output):
         if re.match('^question$', command):
             self.send_new_question(channel)
-        if re.match('^answer', command):
-            self.send_new_question(channel)
+        if re.match('^answer$', command):
+            self.send_trivia_answer(channel)
 
     @staticmethod
     def api_request(url):
@@ -51,7 +56,7 @@ class Trivia(PluginBase, Observer):
         self.current = data[0]
 
         answer = self.current['answer']
-        answer = re.sub(r'^"|<.*?>|"$', '', answer.replace('\"', '').replace("\'", ""))
+        answer = re.sub(r'^"|<.*?>|\(.*?\)|"$', '', answer.replace('\"', '').replace("\'", ""))
         self.current['answer'] = answer
 
         return self.current

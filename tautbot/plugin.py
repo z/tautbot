@@ -6,6 +6,7 @@ class PluginRegistry:
     def __init__(self):
         self.plugins = []
         self.commands = []
+        self.subcommands = []
         self.aliases = []
         self.patterns = []
         self.instances = {}
@@ -46,6 +47,10 @@ class PluginRegistry:
 
         _class = getattr(importlib.import_module("tautbot.plugins.{}".format(name.lower())), name)
         self.commands.append({command: _class})
+
+        if subcommands:
+            for subcommand in subcommands:
+                self.subcommands.append(subcommand)
 
         if aliases:
             for alias in aliases:

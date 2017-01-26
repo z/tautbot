@@ -39,12 +39,21 @@ class Tautbot:
                         Event('channel_pattern_matched', pattern=_pattern, channel=_channel, text=output['text'], output=output)
 
                     elif conf['at_bot'] in output['text']:
+
                         # text after the @ mention, whitespace removed
-                        _command = output['text'].split(conf['at_bot'])[1].strip().lower()
-                        if _command in plugin_registry.commands:
-                            Event('channel_command', command=_command, channel=_channel, text=output['text'], output=output)
+                        _message = output['text'].split(conf['at_bot'])[1].strip().lower()
+                        _command = _message.split(" ")[0]
+
+                        if _command in {k for d in plugin_registry.commands for k in d}:
+
+                            _message_parts = _message.split(" ")
+
+                            if len(_message_parts) > 1 and _message_parts[1] in plugin_registry.subcommands:
+                                Event('channel_subcommand', command=_command, channel=_channel, text=_message, output=output)
+                            Event('channel_command', command=_command, channel=_channel, text=_message, output=output)
+
                         elif _command in [p[0] for p in plugin_registry.aliases]:
-                            Event('channel_alias', command=_command, channel=_channel, text=output['text'], output=output)
+                            Event('channel_alias', command=_command, channel=_channel, text=_message, output=output)
 
     def list_channels(self):
         channels_call = self.slack_client.api_call("channels.list")
@@ -55,7 +64,7 @@ class Tautbot:
 
 if __name__ == "__main__":
 
-    plugin_registry.register_plugin_list(['Trivia', 'Hello'])
+    plugin_registry.register_plugin_list(['Trivia', 'Hello', 'Google', 'Urban', 'Cat', 'Flip', 'Joke', 'List', 'DWI'])
 
     if slack_client.rtm_connect():
         tautbot = Tautbot(slack_client=slack_client, plugin_registry=plugin_registry)

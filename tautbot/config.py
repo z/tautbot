@@ -26,6 +26,7 @@ conf = {
     'slack_bot_token': slack_bot_token,
     'at_bot': "<@{}>".format(bot_id),
     'tickrate': int(config['tautbot']['tickrate']),
+    'data_dir': config.get('tautbot', 'data', fallback='data'),
 }
 
 logging.config.fileConfig(logging_config_file, defaults={

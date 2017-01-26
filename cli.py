@@ -1,13 +1,25 @@
 from tautbot.plugin import plugin_registry
 import re
 
-plugin_registry.register_plugin_list(['Trivia', 'Hello'])
+plugin_registry.register_plugin_list(['Trivia', 'Hello', 'Google'])
 
 # print(plugin_registry.plugins)
 # print(plugin_registry.commands)
 # print(plugin_registry.patterns)
 # print([p[0] for p in plugin_registry.patterns])
 
+from tautbot.config import conf
+
+output = '{} command subcommand follow up text'.format(conf['at_bot'])
+
+command = output.split(conf['at_bot'])[1].strip().lower()
+print(command)
+
+instance = plugin_registry.instances['Google']
+
+instance.google_search('google', 'test')
+
+exit()
 
 command = "ni!"
 
