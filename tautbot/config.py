@@ -24,7 +24,8 @@ else:
 conf = {
     'bot_id': bot_id,
     'slack_bot_token': slack_bot_token,
-    'at_bot': "<@{}>".format(bot_id)
+    'at_bot': "<@{}>".format(bot_id),
+    'tickrate': int(config['tautbot']['tickrate']),
 }
 
 logging.config.fileConfig(logging_config_file, defaults={

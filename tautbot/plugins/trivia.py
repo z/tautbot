@@ -5,19 +5,23 @@ import urllib.error
 import re
 
 from tautbot.plugin import PluginBase
+from tautbot.events import Observer
+from tautbot.slack import slack_client
 
 
-class Trivia(PluginBase):
+class Trivia(PluginBase, Observer):
     def __init__(self, command='trivia',
                        subcommands=(
                           ('question', 'get_trivia_question'),
                           ('answer', 'get_trivia_answer')
-                       ), aliases=None):
-        super(self.__class__, self).__init__(command=command, subcommands=subcommands, aliases=aliases)
+                       )):
+        super(self.__class__, self).__init__(command=command, subcommands=subcommands)
+        Observer.__init__(self)
         self.base_url = "http://jservice.io/api"
         self.current = None
 
-    def foo(self):
+    def events(self, *args, **kwargs):
+        self.observe('pre_parse_slack_output', self.think)
         pass
 
     @staticmethod
@@ -55,3 +59,24 @@ class Trivia(PluginBase):
         self.current = None
 
         return answer
+
+    def send_new_question(self, channel):
+        q = self.get_trivia_question()
+        print(q)
+        print(q['answer'])
+        response = "[{}] {}?".format(q['category']['title'], q['question'])
+
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
+    def think(self, output, channel):
+        if self.current:
+            current_answer = self.current['answer']
+
+            if re.match('({}?)'.format(current_answer), output):
+                answer = self.get_trivia_answer()
+                if answer:
+                    response = "Yay! You answered it correctly: {}".format(answer)
+                    slack_client.api_call("chat.postMessage", channel=channel,
+                                          text=response, as_user=True)
+                    self.send_new_question(channel)
+

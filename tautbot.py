@@ -1,94 +1,47 @@
+import re
 import time
 
-from slackclient import SlackClient
-
 from tautbot.config import conf
+from tautbot.events import Event
 from tautbot.plugin import plugin_registry
+from tautbot.slack import slack_client
+from tautbot.session import Session
 
-EXAMPLE_COMMAND = "do"
-
-TRIVIA_COMMAND = "question"
-ANSWER_COMMAND = "answer"
+session = Session()
 
 
 class Tautbot:
 
-    def __init__(self, slack_client, trivia):
+    def __init__(self, slack_client=slack_client, plugin_registry=plugin_registry):
         self.slack_client = slack_client
-        self.trivia = trivia
+        self.plugin_registry = plugin_registry
 
-    def handle_command(self, command, channel):
+    @staticmethod
+    def parse_slack_output(output_lines):
         """
-            Receives commands directed at the bot, and determines if they
-            are valid commands.
-        """
-        new_question = None
-        response = "Not sure what you mean. Use the *" + EXAMPLE_COMMAND + \
-                   "* command with numbers, delimited by spaces."
-        print("{}: {}".format(channel, command))
-
-        if command.startswith(EXAMPLE_COMMAND):
-            response = "Sure...write some more code then I can do that!"
-
-        elif command.startswith(TRIVIA_COMMAND):
-
-            self.send_new_question(channel)
-            return
-
-        elif command.startswith(ANSWER_COMMAND):
-
-            answer = self.trivia.get_trivia_answer()
-            if answer:
-                response = answer
-            else:
-                response = "Please ask another question first"
-
-        elif command.startswith('GOTIT'):
-
-            answer = self.trivia.get_trivia_answer()
-            if answer:
-                response = "Yay! You answered it correctly: {}".format(answer)
-                new_question = True
-
-        self.slack_client.api_call("chat.postMessage", channel=channel,
-                                   text=response, as_user=True)
-
-        if new_question:
-            self.send_new_question(channel)
-
-    def send_new_question(self, channel):
-        q = self.trivia.get_trivia_question()
-        print(q)
-        print(q['answer'])
-        response = "[{}] {}?".format(q['category']['title'], q['question'])
-
-        self.slack_client.api_call("chat.postMessage", channel=channel,
-                                   text=response, as_user=True)
-
-    def parse_slack_output(self, slack_rtm_output):
-        """
+          Find command or pattern
             The Slack Real Time Messaging API is an events firehose.
             this parsing function returns None unless a message is
             directed at the Bot, based on its ID.
         """
-        output_list = slack_rtm_output
+        if output_lines and len(output_lines) > 0:
+            for output in output_lines:
 
-        current_answer = None
+                if 'text' in output:
+                    patterns = '(?:({}))'.format('|'.join([p[0] for p in plugin_registry.patterns]))
+                    _matches = re.match(patterns, output['text'])
+                    _channel = output['channel']
 
-        if self.trivia.current:
-            current_answer = self.trivia.current['answer']
+                    Event('pre_parse_slack_output', output, _channel)
 
-        # raw
-        if output_list and len(output_list) > 0:
-            for output in output_list:
-                if output and 'text' in output and conf['at_bot'] in output['text']:
-                    # return text after the @ mention, whitespace removed
-                    return output['text'].split(conf['at_bot'])[1].strip().lower(), \
-                           output['channel']
-                elif output and 'text' in output and current_answer and current_answer in output['text']:
-                    return 'GOTIT', output['channel']
+                    if output and 'text' in output and _matches:
+                        _pattern = _matches.group(0)
+                        Event('channel_pattern_matched', pattern=_pattern, channel=_channel, text=output['text'], output=output)
 
-        return None, None
+                    elif output and 'text' in output and conf['at_bot'] in output['text']:
+                        # text after the @ mention, whitespace removed
+                        _command = output['text'].split(conf['at_bot'])[1].strip().lower()
+                        Event('channel_command', command=_command, channel=_channel, text=output['text'], output=output)
 
     def list_channels(self):
         channels_call = self.slack_client.api_call("channels.list")
@@ -99,30 +52,22 @@ class Tautbot:
 
 if __name__ == "__main__":
 
-    # instantiate Slack & Twilio clients
-    slack_client = SlackClient(conf['slack_bot_token'])
-
-    plugin_registry.register_plugin_list(['Trivia'])
-    trivia = plugin_registry.commands[0]['trivia']()
-
-    tautbot = Tautbot(slack_client=slack_client, trivia=trivia)
-
-    # List
-    channels = tautbot.list_channels()
-
-    if channels:
-        print("Channels: ")
-        for c in channels:
-            print(c['name'] + " (" + c['id'] + ")")
-
-    READ_WEBSOCKET_DELAY = 1  # 1 second delay between reading from firehose
+    plugin_registry.register_plugin_list(['Trivia', 'Hello'])
 
     if slack_client.rtm_connect():
+        tautbot = Tautbot(slack_client=slack_client, plugin_registry=plugin_registry)
+        session.tautbot = tautbot
         print("tautbot connected and running!")
+
+        channels = tautbot.list_channels()
+
+        if channels:
+            print("Channels: ")
+            for c in channels:
+                print(c['name'] + " (" + c['id'] + ")")
+
         while True:
-            command, channel = tautbot.parse_slack_output(slack_client.rtm_read())
-            if command and channel:
-                tautbot.handle_command(command, channel)
-            time.sleep(READ_WEBSOCKET_DELAY)
+            tautbot.parse_slack_output(slack_client.rtm_read())
+            time.sleep(conf['tickrate'])
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
