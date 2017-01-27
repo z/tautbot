@@ -22,6 +22,7 @@ else:
     slack_bot_token = config['tautbot']['slack_bot_token']
 
 conf = {
+    'bot_prefix': config.get('tautbot', 'bot_prefix', fallback=','),
     'bot_id': bot_id,
     'slack_bot_token': slack_bot_token,
     'at_bot': "<@{}>".format(bot_id),
