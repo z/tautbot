@@ -28,7 +28,7 @@ class Factoid(PluginBase, Observer):
                        )):
         super(self.__class__, self).__init__(command=command, aliases=aliases)
         Observer.__init__(self)
-        self.default_dict = {"commands": "http://google.com"}
+        self.default_dict = {"who": "https://github.com/z"}
         self.factoid_cache = defaultdict(lambda: self.default_dict)
         self.load_cache()
 
@@ -40,25 +40,25 @@ class Factoid(PluginBase, Observer):
         if command == 'factoid':
             text = text.replace(command, '').strip()
 
-        if re.match('^list$', text):
-            self.list_factoids(channel)
+            if re.match('^list$', text):
+                self.list_factoids(channel)
 
-        elif re.match('^add .+', text):
-            _text_parts = text.split(' ')[2:]
-            word = _text_parts[0].strip()
-            data = ' '.join(_text_parts[1:])
-            self.add_factoid(channel, word, data)
+            elif re.match('^add .+', text):
+                _text_parts = text.split(' ')[2:]
+                word = _text_parts[0].strip()
+                data = ' '.join(_text_parts[1:])
+                self.add_factoid(channel, word, data)
 
-        elif re.match('^delete [\w\d]+', text):
-            _text_parts = text.split(' ')[2:]
-            word = _text_parts[0].strip()
-            self.delete_factoid(channel, word)
+            elif re.match('^delete [\w\d]+', text):
+                _text_parts = text.split(' ')[2:]
+                word = _text_parts[0].strip()
+                self.delete_factoid(channel, word)
 
-        elif re.match('^info [\w\d]+', text):
-            _text_parts = text.split(' ')
-            word = _text_parts[1].strip()
-            print('>>>> ' + word)
-            self.info(channel, word)
+            elif re.match('^info [\w\d]+', text):
+                _text_parts = text.split(' ')
+                word = _text_parts[1].strip()
+                print('>>>> ' + word)
+                self.info(channel, word)
 
     def load_cache(self):
         for row in self.db.execute(table.select()):

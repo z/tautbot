@@ -51,7 +51,7 @@ class PluginRegistry(Base):
                         'aliases': aliases, 'patterns': patterns, 'instance': instance}
         self.plugins.append(entry_points)
 
-        _class = getattr(importlib.import_module("tautbot.plugins.{}".format(name.lower())), name)
+        _class = getattr(importlib.import_module("plugins.{}".format(name.lower())), name)
         self.commands.append({command: _class})
 
         if subcommands:
@@ -83,7 +83,7 @@ class PluginRegistry(Base):
         """
         for p in plugins:
             try:
-                _class = getattr(importlib.import_module("tautbot.plugins.{}".format(p.lower())), p)
+                _class = getattr(importlib.import_module("plugins.{}".format(p.lower())), p)
                 plugin = _class()
                 self.register_plugin(name=plugin.name, command=plugin.command, subcommands=plugin.subcommands, aliases=plugin.aliases, patterns=plugin.patterns, instance=plugin)
                 self.logger.info('registering events for: {}'.format(plugin.name))
