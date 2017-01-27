@@ -21,8 +21,12 @@ if os.environ.get("SLACK_BOT_TOKEN"):
 else:
     slack_bot_token = config['tautbot']['slack_bot_token']
 
+plugins_str = config.get('tautbot', 'plugins', fallback='Hello Google Urban Cat Flip Joke List')
+plugins = plugins_str.split(' ')
+
 conf = {
     'bot_prefix': config.get('tautbot', 'bot_prefix', fallback=','),
+    'plugins': plugins,
     'bot_id': bot_id,
     'slack_bot_token': slack_bot_token,
     'at_bot': "<@{}>".format(bot_id),

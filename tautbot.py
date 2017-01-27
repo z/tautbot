@@ -11,9 +11,7 @@ session = Session()
 
 if __name__ == "__main__":
 
-    plugins = ['Trivia', 'Hello', 'Google', 'Urban', 'Cat', 'Flip', 'Joke', 'List', 'DWI']
-
-    plugin_registry.register_plugin_list(plugins=plugins)
+    plugin_registry.register_plugin_list(plugins=conf['plugins'])
 
     if slack_client.rtm_connect():
         tautbot = Tautbot(slack_client=slack_client, plugin_registry=plugin_registry)

@@ -7,6 +7,10 @@ Create a `tautbot.ini` file with the following content, substituting the placeho
 ```
 [tautbot]
 
+bot_prefix = ,
+plugins = Trivia Hello Google Urban Cat Flip Joke List
+tickrate = 1
+
 bot_id = xxxxxxxx
 slack_bot_token = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
