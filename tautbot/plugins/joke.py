@@ -3,9 +3,9 @@ import os
 import random
 import re
 
+from tautbot.client.slack import slack_client
 from tautbot.plugin import PluginBase
-from tautbot.events import Observer
-from tautbot.slack import slack_client
+from tautbot.util.events import Observer
 
 
 class Joke(PluginBase, Observer):

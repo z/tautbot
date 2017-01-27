@@ -1,7 +1,7 @@
 import logging
 
 from tautbot.config import conf
-from tautbot.logger import ClassPrefixAdapter
+from tautbot.util.logger import ClassPrefixAdapter
 
 
 class Base(object):

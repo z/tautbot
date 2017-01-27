@@ -1,8 +1,8 @@
 import re
 
-from tautbot.events import Observer
+from tautbot.client.slack import slack_client
 from tautbot.plugin import PluginBase
-from tautbot.slack import slack_client
+from tautbot.util.events import Observer
 
 
 class Hello(PluginBase, Observer):

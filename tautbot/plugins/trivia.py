@@ -1,12 +1,12 @@
 import json
-import urllib
-import urllib.request
-import urllib.error
 import re
+import urllib
+import urllib.error
+import urllib.request
 
-from tautbot.events import Observer
+from tautbot.client.slack import slack_client
 from tautbot.plugin import PluginBase
-from tautbot.slack import slack_client
+from tautbot.util.events import Observer
 
 
 class Trivia(PluginBase, Observer):

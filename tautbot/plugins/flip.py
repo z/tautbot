@@ -1,12 +1,11 @@
 import random
 import re
-
 from collections import defaultdict
 
-from tautbot.events import Observer
+from tautbot.client.slack import slack_client
 from tautbot.plugin import PluginBase
-from tautbot.slack import slack_client
-from tautbot.util import multi_replace
+from tautbot.util.events import Observer
+from tautbot.util.formatters import multi_replace
 
 
 class Flip(PluginBase, Observer):

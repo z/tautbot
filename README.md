@@ -57,3 +57,7 @@ class Hello(PluginBase, Observer):
         slack_client.api_call("chat.postMessage", channel=channel,
                               text="Hello World!", as_user=True)
 ```
+
+## Credits
+
+Many ideas, and plugins adapted from CloudBot
