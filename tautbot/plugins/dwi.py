@@ -1,12 +1,9 @@
-import codecs
-import os
 import random
 import re
 
-from tautbot.plugin import PluginBase
 from tautbot.events import Observer
+from tautbot.plugin import PluginBase
 from tautbot.slack import slack_client
-from tautbot.config import conf
 
 
 class DWI(PluginBase, Observer):
@@ -25,13 +22,12 @@ class DWI(PluginBase, Observer):
         ]
         self.phrases = [
             'Stop complaining, {}, and',
-            'Jesus fuck {}, just',
+            'Psssh {}, just',
             'Looks like {} needs to',
             'Ever think that {} just needs to'
         ]
 
     def events(self, *args, **kwargs):
-        print('registered events for: {}'.format(self.name))
         self.observe('channel_command', self.route_event)
 
     def route_event(self, command, channel, text, output):

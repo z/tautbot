@@ -6,7 +6,6 @@ import re
 from tautbot.plugin import PluginBase
 from tautbot.events import Observer
 from tautbot.slack import slack_client
-from tautbot.config import conf
 
 
 class Joke(PluginBase, Observer):
@@ -17,11 +16,10 @@ class Joke(PluginBase, Observer):
         self.load_jokes()
 
     def load_jokes(self):
-        with codecs.open(os.path.join(conf['data_dir'], "one_liners.txt"), encoding="utf-8") as f:
+        with codecs.open(os.path.join(self.conf['data_dir'], "one_liners.txt"), encoding="utf-8") as f:
             self.one_liner = [line.strip() for line in f.readlines() if not line.startswith("//")]
 
     def events(self, *args, **kwargs):
-        print('registered events for: {}'.format(self.name))
         self.observe('channel_command', self.route_event)
 
     def route_event(self, command, channel, text, output):

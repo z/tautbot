@@ -3,8 +3,8 @@ import re
 
 from collections import defaultdict
 
-from tautbot.plugin import PluginBase
 from tautbot.events import Observer
+from tautbot.plugin import PluginBase
 from tautbot.slack import slack_client
 from tautbot.util import multi_replace
 
@@ -62,7 +62,6 @@ class Flip(PluginBase, Observer):
         self.table_flipper = "┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻"
 
     def events(self, *args, **kwargs):
-        print('registered events for: {}'.format(self.name))
         self.observe('channel_command', self.route_event)
         self.observe('channel_alias', self.route_event)
 

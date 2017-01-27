@@ -4,8 +4,8 @@ import requests
 
 from bs4 import BeautifulSoup
 
-from tautbot.plugin import PluginBase
 from tautbot.events import Observer
+from tautbot.plugin import PluginBase
 from tautbot.slack import slack_client
 
 
@@ -21,13 +21,12 @@ class Google(PluginBase, Observer):
         self.base_url = 'http://dogpile.com/search'
 
     def events(self, *args, **kwargs):
-        print('registered events for: {}'.format(self.name))
         self.observe('channel_command', self.route_event)
         self.observe('channel_alias', self.route_event)
 
     def route_event(self, command, channel, text, output):
         text = text.replace(command, '').strip()
-        if re.match('^gis', command):
+        if re.match('^gis$', command):
             self.google_image_search(channel, text)
         if re.match('^google$', command):
             self.google_search(channel, text)
@@ -59,7 +58,8 @@ class Google(PluginBase, Observer):
         if web_results:
             result_url = requests.get(web_results.find_all('a', {'class': 'resultDisplayUrl'})[0]['href'], headers=self.headers).url
             result_description = soup.find('div', id="webResults").find_all('div', {'class': 'resultDescription'})[0].text
-            print(result_url, result_description)
+
+            self.logger.debug(result_url, result_description)
             response = "{} -- {}".format(result_url, result_description)
 
             slack_client.api_call("chat.postMessage", channel=channel,

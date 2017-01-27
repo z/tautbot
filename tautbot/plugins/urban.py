@@ -2,16 +2,15 @@ import random
 import re
 import requests
 
-from tautbot.plugin import PluginBase
 from tautbot.events import Observer
+from tautbot.plugin import PluginBase
 from tautbot.slack import slack_client
 
 
 class Urban(PluginBase, Observer):
     def __init__(self, command='urban',
                  aliases=(
-                     ('urban', 'urban'),
-                     ('urand', 'urban')
+                     ('urand', 'urban'),
                  )):
         super(self.__class__, self).__init__(command=command, aliases=aliases)
         Observer.__init__(self)
@@ -20,7 +19,6 @@ class Urban(PluginBase, Observer):
         self.base_url = 'http://api.urbandictionary.com/v0'
 
     def events(self, *args, **kwargs):
-        print('registered events for: {}'.format(self.name))
         self.observe('channel_command', self.route_event)
         self.observe('channel_alias', self.route_event)
 
@@ -28,7 +26,7 @@ class Urban(PluginBase, Observer):
         text = text.replace(command, '').strip()
         if re.match('^urand', command):
             self.urban(channel, text=False)
-        elif re.match('^urban\s+', command):
+        elif re.match('^urban', command):
             self.urban(channel, text)
 
     def urban(self, channel, text):

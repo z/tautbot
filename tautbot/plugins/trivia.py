@@ -4,8 +4,8 @@ import urllib.request
 import urllib.error
 import re
 
-from tautbot.plugin import PluginBase
 from tautbot.events import Observer
+from tautbot.plugin import PluginBase
 from tautbot.slack import slack_client
 
 
@@ -19,13 +19,12 @@ class Trivia(PluginBase, Observer):
                     ('question', 'get_trivia_question'),
                     ('answer', 'get_trivia_answer')
                  )):
-        super(self.__class__, self).__init__(command=command, aliases=aliases)
+        super(self.__class__, self).__init__(command=command, aliases=aliases, subcommands=subcommands)
         Observer.__init__(self)
         self.base_url = "http://jservice.io/api"
         self.current = None
 
     def events(self, *args, **kwargs):
-        print('registered events for: {}'.format(self.name))
         self.observe('pre_parse_slack_output', self.think)
         self.observe('channel_alias', self.route_event)
 
@@ -35,8 +34,7 @@ class Trivia(PluginBase, Observer):
         if re.match('^answer$', command):
             self.send_trivia_answer(channel)
 
-    @staticmethod
-    def api_request(url):
+    def api_request(self, url):
         req = urllib.request.Request(url)
 
         try:
@@ -44,7 +42,7 @@ class Trivia(PluginBase, Observer):
             raw_data = response.read()
             data = json.loads(raw_data.decode("utf-8"))
         except urllib.error.HTTPError as err:
-            print("API Request Error: {0}".format(err))
+            self.logger.error("API Request Error: {0}".format(err))
             raise UserWarning
 
         return data
@@ -63,10 +61,12 @@ class Trivia(PluginBase, Observer):
 
     def send_new_question(self, channel):
         q = self.get_trivia_question()
-        print(q)
-        print(q['answer'])
-        response = "[{}] {}?".format(q['category']['title'], q['question'])
 
+        self.logger.debug('Question JSON: {}'.format(q))
+        self.logger.info('Question: {}'.format(q['question']))
+        self.logger.info('Answer: {}'.format(q['answer']))
+
+        response = "[{}] {}?".format(q['category']['title'], q['question'])
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
     def get_trivia_answer(self):

@@ -1,9 +1,14 @@
 import importlib
+
 from abc import ABCMeta, abstractmethod
 
+from tautbot.base import Base
 
-class PluginRegistry:
+
+class PluginRegistry(Base):
+
     def __init__(self):
+        super().__init__()
         self.plugins = []
         self.commands = []
         self.subcommands = []
@@ -80,12 +85,13 @@ class PluginRegistry:
                 _class = getattr(importlib.import_module("tautbot.plugins.{}".format(p.lower())), p)
                 plugin = _class()
                 self.register_plugin(name=plugin.name, command=plugin.command, subcommands=plugin.subcommands, aliases=plugin.aliases, patterns=plugin.patterns, instance=plugin)
+                self.logger.info('registering events for: {}'.format(plugin.name))
                 plugin.events()
             except FileExistsError as e:
                 raise SystemExit("Failed to load plugin: {}: {}".format(p, e))
 
 
-class PluginBase(metaclass=ABCMeta):
+class PluginBase(Base, metaclass=ABCMeta):
     """
     PluginBase interface
 
@@ -112,6 +118,7 @@ class PluginBase(metaclass=ABCMeta):
     :returns: ``MapPackage``
     """
     def __init__(self, command=None, subcommands=None, aliases=None, patterns=None):
+        super().__init__()
         self.plugin_registry = plugin_registry
         self.command = command
         self.subcommands = subcommands
@@ -126,5 +133,7 @@ class PluginBase(metaclass=ABCMeta):
     def events(self, *args, **kwargs):
         pass
 
+    def route_event(self, command, channel, text, output):
+        pass
 
 plugin_registry = PluginRegistry()
