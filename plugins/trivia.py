@@ -4,7 +4,7 @@ import urllib
 import urllib.error
 import urllib.request
 
-from sqlalchemy import Table, Column, String, Integer, PrimaryKeyConstraint
+from sqlalchemy import Table, Column, String, Integer, PrimaryKeyConstraint, desc
 from sqlalchemy.sql import select
 
 from tautbot.client.slack import slack_client
@@ -20,7 +20,7 @@ table = Table(
     Column("score", Integer),
     Column("name", String(25)),
     Column("channel", String(65)),
-    PrimaryKeyConstraint('id')
+    PrimaryKeyConstraint('id', 'channel')
 )
 
 database.metadata.create_all()
@@ -30,11 +30,13 @@ class Trivia(PluginBase, Observer):
     def __init__(self, command='trivia',
                  subcommands=(
                     ('question', 'get_trivia_question'),
-                    ('answer', 'get_trivia_answer')
+                    ('answer', 'get_trivia_answer'),
+                    ('top', 'db_top_scores'),
                  ),
                  aliases=(
                     ('question', 'get_trivia_question'),
-                    ('answer', 'get_trivia_answer')
+                    ('answer', 'get_trivia_answer'),
+                    ('top', 'db_top_scores'),
                  )):
         super(self.__class__, self).__init__(command=command, aliases=aliases, subcommands=subcommands)
         Observer.__init__(self)
@@ -51,6 +53,8 @@ class Trivia(PluginBase, Observer):
             self.send_new_question(channel)
         if re.match('^answer$', command):
             self.send_trivia_answer(channel)
+        if re.match('^top', command):
+            self.db_top_scores(channel)
 
     def api_request(self, url):
         req = urllib.request.Request(url)
@@ -74,19 +78,19 @@ class Trivia(PluginBase, Observer):
         self.current = self.question_cache.pop()
 
         answer = self.current['answer']
-        answer = re.sub(r'^"|<.*?>|\(.*?\)|"$', '', answer.replace('\"', '').replace("\'", ""))
-        self.current['answer'] = answer
+        answer = re.sub(r'^"|<.*?>|\(.*?\)|^an? |"$', '', answer.replace('\"', '').replace("\'", ""))
+        self.current['answer'] = answer.lower().strip()
 
         return self.current
 
     def send_new_question(self, channel):
-        q = self.get_trivia_questions()
+        q = self.get_trivia_question()
 
         self.logger.debug('Question JSON: {}'.format(q))
         self.logger.info('Question: {}'.format(q['question']))
         self.logger.info('Answer: {}'.format(q['answer']))
 
-        response = "[{}] {}?".format(q['category']['title'], q['question'])
+        response = "[{}] {}".format(q['category']['title'], q['question'])
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
     def get_trivia_answer(self):
@@ -110,7 +114,7 @@ class Trivia(PluginBase, Observer):
             current_answer = self.current['answer']
             user_id = output['user']
 
-            if current_answer.lower() == output['text'].lower():
+            if current_answer == output['text'].lower().strip():
                 answer = self.get_trivia_answer()
                 if answer:
 
@@ -153,3 +157,27 @@ class Trivia(PluginBase, Observer):
             .values(score=score)
         database.db.execute(query)
         database.db.commit()
+
+    @staticmethod
+    def db_top_scores(channel):
+        query = select([table.c.name, table.c.score]) \
+                       .where(table.c.channel == channel) \
+                       .order_by(desc(table.c.score))
+        scores = database.db.execute(query)
+
+        template = 'Top Scores: '
+        data = []
+
+        for row in scores:
+            template += '{}: {}, '
+            data.append(row.name)
+            data.append(row.score)
+
+        template = template.rstrip(', ')
+        if data:
+            response = template.format(*data)
+        else:
+            response = "No scores here yet."
+
+        slack_client.api_call("chat.postMessage", channel=channel,
+                              text=response, as_user=True)

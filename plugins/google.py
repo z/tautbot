@@ -13,6 +13,7 @@ class Google(PluginBase, Observer):
     def __init__(self, command='google',
                  aliases=(
                      ('google', 'google_search'),
+                     ('g', 'google_search'),
                      ('gis', 'google_image_search')
                  )):
         super(self.__class__, self).__init__(command=command, aliases=aliases)
@@ -28,7 +29,7 @@ class Google(PluginBase, Observer):
         text = text.replace(command, '').strip()
         if re.match('^gis$', command):
             self.google_image_search(channel, text)
-        if re.match('^google$', command):
+        if re.match('^g(oogle)?$', command):
             self.google_search(channel, text)
 
     def google_image_search(self, channel, text):
