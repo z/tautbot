@@ -32,7 +32,8 @@ conf = {
     'at_bot': "<@{}>".format(bot_id),
     'tickrate': int(config['tautbot']['tickrate']),
     'data_dir': config.get('tautbot', 'data', fallback='data'),
-    'giphy_api_key': config.get('giphy_api_key', 'data', fallback='dc6zaTOxFJmzC'),  # Public beta test key
+    'giphy_api_key': config.get('tautbot', 'giphy_api_key', fallback='dc6zaTOxFJmzC'),  # Public beta test key
+    'weather_api_key': config.get('tautbot', 'weather_api_key', fallback=None),
 }
 
 logging.config.fileConfig(logging_config_file, defaults={

@@ -1,4 +1,7 @@
-beautifulsoup4
-requests
-slackclient
-sqlalchemy
+asteval          # calc.py
+beautifulsoup4   # google.py
+cleverbot        # ask.py
+pyowm            # weather.py
+requests         # cat.py, giphy.py, google.py, imdb.py, urban.py
+slackclient      # core
+sqlalchemy       # core

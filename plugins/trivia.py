@@ -75,10 +75,14 @@ class Trivia(PluginBase, Observer):
         if not self.question_cache:
             self.question_cache = self.api_request("{}{}".format(self.base_url, endpoint))
 
-        self.current = self.question_cache.pop()
+        next_question = self.question_cache.pop()
+        if next_question['invalid_count'] and next_question['invalid_count'] > 0:
+            self.get_trivia_question()
 
+        self.current = next_question
         answer = self.current['answer']
-        answer = re.sub(r'^"|<.*?>|\(.*?\)|^an? |"$', '', answer.replace('\"', '').replace("\'", ""))
+        answer.replace('\\', '').replace('\"', '').replace("\'", "")
+        answer = re.sub(r'^"|<.*?>|\(.*?\)|^an? |"$', '', answer)
         self.current['answer'] = answer.lower().strip()
 
         return self.current
@@ -90,7 +94,9 @@ class Trivia(PluginBase, Observer):
         self.logger.info('Question: {}'.format(q['question']))
         self.logger.info('Answer: {}'.format(q['answer']))
 
-        response = "[{}] {}".format(q['category']['title'], q['question'])
+        response = "[*{}*] {}".format(q['category']['title'], q['question'])
+        if q['value']:
+            response += " _(difficulty: {})_".format(q['value'])
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
     def get_trivia_answer(self):
@@ -165,11 +171,11 @@ class Trivia(PluginBase, Observer):
                        .order_by(desc(table.c.score))
         scores = database.db.execute(query)
 
-        template = 'Top Scores: '
+        template = '_Top Scores_: '
         data = []
 
         for row in scores:
-            template += '{}: {}, '
+            template += '*{}*: {}, '
             data.append(row.name)
             data.append(row.score)
 
