@@ -8,11 +8,13 @@ Create a `tautbot.ini` file with the following content, substituting the placeho
 [tautbot]
 
 bot_prefix = ,
-plugins = Trivia Hello Google Urban Cat Flip Joke List
+plugins = Trivia Hello Google Urban Cat Flip Joke List DWI IMDB Giphy Factoid Fight Ask Calc Weather
 tickrate = 1
 
-bot_id = xxxxxxxx
-slack_bot_token = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+bot_id = xxxxxxxxx
+slack_bot_token = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+giphy_api_key = xxxxxxxxx
+weather_api_key = xxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 Run the bot out of this directory:

@@ -83,9 +83,10 @@ class Trivia(PluginBase, Observer):
         self.current = next_question
         answer = self.current['answer']
         answer.replace('\\', '').replace('\"', '').replace("\'", "")
-        answer = re.sub(r'\s{2,}', ' ', answer)
+        answer = answer.lower().strip()
+        answer = re.sub(r'\s{2,}|\.{2,}', ' ', answer)
         answer = re.sub(r'^"|<.*?>|\(.*?\)|^an? |^(the )?|"$', '', answer)
-        self.current['answer'] = answer.lower().strip()
+        self.current['answer'] = answer
 
         return self.current
 
