@@ -31,6 +31,7 @@ class Tautbot(Base):
         # set botvars so plugins can access when loading
         database.metadata = self.db_metadata
         database.base = self.db_base
+        database.db = self.db
 
         if slack_client:
             slack.slack_client = slack_client
@@ -97,21 +98,3 @@ class Tautbot(Base):
         elif _command in [p[0] for p in self.plugin_registry.aliases]:
             self.logger.info('command "{}" recognized as alias'.format(_command))
             Event('channel_alias', command=_command, channel=_channel, text=_message, output=output)
-
-    def list_channels(self):
-        channels_call = self.slack_client.api_call("channels.list")
-        if channels_call['ok']:
-            return channels_call['channels']
-        return None
-
-    @staticmethod
-    def get_users():
-        if slack.slack_client:
-            data = slack.slack_client.api_call("users.list")
-            return data['members']
-
-    def get_user(self, user_id):
-        slack.slack_userlist = self.get_users()
-        index = next(index for (index, d) in enumerate(slack.slack_userlist) if d['id'] == user_id)
-
-        return slack.slack_userlist[index]['real_name']

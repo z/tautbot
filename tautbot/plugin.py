@@ -3,7 +3,6 @@ import importlib
 from abc import ABCMeta, abstractmethod
 
 from tautbot.base import Base
-from tautbot.bot import Tautbot
 
 
 class PluginRegistry(Base):
@@ -92,7 +91,7 @@ class PluginRegistry(Base):
                 raise SystemExit("Failed to load plugin: {}: {}".format(p, e))
 
 
-class PluginBase(Tautbot, metaclass=ABCMeta):
+class PluginBase(Base, metaclass=ABCMeta):
     """
     PluginBase interface
 

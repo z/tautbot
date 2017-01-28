@@ -10,21 +10,21 @@ session = Session()
 
 if __name__ == "__main__":
 
-    plugin_registry.register_plugin_list(plugins=conf['plugins'])
-
     if slack.slack_client.rtm_connect():
         tautbot = Tautbot(slack_client=slack.slack_client, plugin_registry=plugin_registry)
         session.tautbot = tautbot
         print("tautbot connected and running!")
 
-        channels = tautbot.list_channels()
+        channels = slack.slack_helpers.list_channels()
 
         if channels:
             print("Channels: ")
             for c in channels:
                 print(c['name'] + " (" + c['id'] + ")")
 
-        slack.slack_userlist = tautbot.get_users()
+        slack.slack_userlist = slack.slack_helpers.get_users()
+
+        plugin_registry.register_plugin_list(plugins=conf['plugins'])
 
         while True:
             tautbot.parse_slack_output(slack.slack_client.rtm_read())

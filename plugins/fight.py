@@ -2,6 +2,7 @@ import random
 import re
 
 from tautbot.client.slack import slack_client
+from tautbot.client.slack import slack_helpers
 from tautbot.plugin import PluginBase
 from tautbot.util.events import Observer
 
@@ -27,7 +28,7 @@ class Fight(PluginBase, Observer):
     def fight(self, channel, text, user_id):
         """<nick>, makes you fight <nick> and generates a winner."""
 
-        fighter1 = self.get_user(user_id)
+        fighter1 = slack_helpers.get_user(user_id)
         dirty = text.strip()
         fighter2 = re.sub('[^0-9a-zA-Z_-]+', '', dirty)
         if random.random() < .5:

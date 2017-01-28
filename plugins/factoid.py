@@ -61,7 +61,7 @@ class Factoid(PluginBase, Observer):
                 self.info(channel, word)
 
     def load_cache(self):
-        for row in self.db.execute(table.select()):
+        for row in database.db.execute(table.select()):
             # assign variables
             chan = row["chan"]
             word = row["word"]
@@ -79,17 +79,17 @@ class Factoid(PluginBase, Observer):
         """
         if word in self.factoid_cache[channel]:
             # if we have a set value, update
-            self.db.execute(table.update().values(data=data, nick=nick, chan=channel).where(table.c.chan == channel).where(table.c.word == word))
-            self.db.commit()
+            database.db.execute(table.update().values(data=data, nick=nick, chan=channel).where(table.c.chan == channel).where(table.c.word == word))
+            database.db.commit()
         else:
             # otherwise, insert
-            self.db.execute(table.insert().values(word=word, data=data, nick=nick, chan=channel))
-            self.db.commit()
+            database.db.execute(table.insert().values(word=word, data=data, nick=nick, chan=channel))
+            database.db.commit()
         self.load_cache()
 
     def delete_factoid(self, channel, word):
-        self.db.execute(table.delete().where(table.c.word == word).where(table.c.chan == channel))
-        self.db.commit()
+        database.db.execute(table.delete().where(table.c.word == word).where(table.c.chan == channel))
+        database.db.commit()
         self.load_cache()
 
     def list_factoids(self, channel):

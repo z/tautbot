@@ -97,7 +97,7 @@ class Flip(PluginBase, Observer):
         """fixes a flipped over table. ┬─┬ノ(ಠ_ಠノ)"""
         response = "no tables have been turned over here, thanks for checking!"
         if text in ['table', 'tables']:
-            if self.table_status[channel] == True:
+            if self.table_status[channel]:
                 response = "┬─┬ノ(ಠ_ಠノ)"
                 self.table_status[channel] = False
         else:
