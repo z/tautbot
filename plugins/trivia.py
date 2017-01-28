@@ -20,7 +20,7 @@ table = Table(
     Column("score", Integer),
     Column("name", String(25)),
     Column("channel", String(65)),
-    PrimaryKeyConstraint('id', 'channel')
+    PrimaryKeyConstraint('id')
 )
 
 database.metadata.create_all()
@@ -40,6 +40,7 @@ class Trivia(PluginBase, Observer):
         Observer.__init__(self)
         self.base_url = "http://jservice.io/api"
         self.current = None
+        self.question_cache = None
 
     def events(self, *args, **kwargs):
         self.observe('pre_parse_slack_output', self.think)
@@ -65,10 +66,12 @@ class Trivia(PluginBase, Observer):
         return data
 
     def get_trivia_question(self):
-        endpoint = '/random'
+        endpoint = '/random?count=100'
 
-        data = self.api_request("{}{}".format(self.base_url, endpoint))
-        self.current = data[0]
+        if not self.question_cache:
+            self.question_cache = self.api_request("{}{}".format(self.base_url, endpoint))
+
+        self.current = self.question_cache.pop()
 
         answer = self.current['answer']
         answer = re.sub(r'^"|<.*?>|\(.*?\)|"$', '', answer.replace('\"', '').replace("\'", ""))
@@ -77,7 +80,7 @@ class Trivia(PluginBase, Observer):
         return self.current
 
     def send_new_question(self, channel):
-        q = self.get_trivia_question()
+        q = self.get_trivia_questions()
 
         self.logger.debug('Question JSON: {}'.format(q))
         self.logger.info('Question: {}'.format(q['question']))
