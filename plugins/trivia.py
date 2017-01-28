@@ -6,6 +6,7 @@ import urllib.request
 
 from sqlalchemy import Table, Column, String, Integer, PrimaryKeyConstraint, desc
 from sqlalchemy.sql import select
+from time import sleep
 
 from tautbot.client.slack import slack_client
 from tautbot.client.slack import slack_helpers
@@ -82,7 +83,8 @@ class Trivia(PluginBase, Observer):
         self.current = next_question
         answer = self.current['answer']
         answer.replace('\\', '').replace('\"', '').replace("\'", "")
-        answer = re.sub(r'^"|<.*?>|\(.*?\)|^an? |"$', '', answer)
+        answer = re.sub(r'\s{2,}', ' ', answer)
+        answer = re.sub(r'^"|<.*?>|\(.*?\)|^an? |^(the )?|"$', '', answer)
         self.current['answer'] = answer.lower().strip()
 
         return self.current
@@ -141,6 +143,8 @@ class Trivia(PluginBase, Observer):
                     response = "Yay! {} (score: *{}*) answered it correctly: {}".format(name, score, answer)
                     slack_client.api_call("chat.postMessage", channel=channel,
                                           text=response, as_user=True)
+
+                    sleep(2)
                     self.send_new_question(channel)
 
     @staticmethod

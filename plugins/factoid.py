@@ -44,13 +44,13 @@ class Factoid(PluginBase, Observer):
                 self.list_factoids(channel)
 
             elif re.match('^add .+', text):
-                _text_parts = text.split(' ')[2:]
+                _text_parts = text.split(' ')[1:]
                 word = _text_parts[0].strip()
                 data = ' '.join(_text_parts[1:])
                 self.add_factoid(channel, word, data)
 
             elif re.match('^delete [\w\d]+', text):
-                _text_parts = text.split(' ')[2:]
+                _text_parts = text.split(' ')[1:]
                 word = _text_parts[0].strip()
                 self.delete_factoid(channel, word)
 
