@@ -4,7 +4,7 @@ A bot for Slack
 
 Create a `tautbot.ini` file with the following content, substituting the placeholders for their real values:
 
-```
+```ini
 [tautbot]
 
 bot_prefix = ,
@@ -33,13 +33,41 @@ BOT_ID=xxxxxx; SLACK_BOT_TOKEN=xxxxxxxxxxxxxxxxx; python tautbot.py
 
 Take a look at `PluginBase` in `tautbot/plugin.py` to see what current options are available.
 
-### Example
+### Examples
 
-```
+#### Command
+
+```python
 import re
+
+from tautbot.client.slack import slack_client
 from tautbot.plugin import PluginBase
-from tautbot.events import Observer
-from tautbot.slack import slack_client
+from tautbot.util.events import Observer
+
+
+class Hello(PluginBase, Observer):
+    def __init__(self, command='hello'):
+        super(self.__class__, self).__init__(command=command, patterns=patterns)
+        Observer.__init__(self)
+
+    def events(self, *args, **kwargs):
+        self.observe('channel_command', self.say_hello_world)
+
+    def say_hello_world(self, pattern, channel, text, output):
+        slack_client.api_call("chat.postMessage", channel=channel,
+                              text="Hello World!", as_user=True)
+```
+
+Triggered by `,hello`
+
+#### Pattern
+
+```python
+import re
+
+from tautbot.client.slack import slack_client
+from tautbot.plugin import PluginBase
+from tautbot.util.events import Observer
 
 
 class Hello(PluginBase, Observer):
@@ -51,14 +79,16 @@ class Hello(PluginBase, Observer):
         Observer.__init__(self)
 
     def events(self, *args, **kwargs):
-        print('registered events for: {}'.format(self.name))
-        self.observe('channel_pattern_matched', self.route_event)
+        self.observe('channel_pattern_matched', self.say_hello_world)
 
-    @staticmethod
-    def say_hello_world(channel):
+    def say_hello_world(self, pattern, channel, text, output):
         slack_client.api_call("chat.postMessage", channel=channel,
                               text="Hello World!", as_user=True)
 ```
+
+Triggered by `hello!`
+
+Reference other plugins for more examples.
 
 ## Credits
 
