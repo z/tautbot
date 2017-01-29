@@ -15,14 +15,14 @@ if __name__ == "__main__":
         session.tautbot = tautbot
         print("tautbot connected and running!")
 
-        channels = slack.slack_helpers.list_channels()
+        channels = slack.slack_helpers.get_channels()
 
         if channels:
             print("Channels: ")
             for c in channels:
                 print(c['name'] + " (" + c['id'] + ")")
 
-        slack.slack_userlist = slack.slack_helpers.get_users()
+        slack.slack_user_list = slack.slack_helpers.get_users()
 
         plugin_registry.register_plugin_list(plugins=conf['plugins'])
 

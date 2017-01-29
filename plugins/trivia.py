@@ -145,7 +145,7 @@ class Trivia(PluginBase, Observer):
                     slack_client.api_call("chat.postMessage", channel=channel,
                                           text=response, as_user=True)
 
-                    sleep(2)
+                    sleep(5)
                     self.send_new_question(channel)
 
     @staticmethod

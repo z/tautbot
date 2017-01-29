@@ -1,3 +1,4 @@
+import datetime
 import re
 
 from sqlalchemy import Table, Column, String, Integer, Float, UniqueConstraint, desc
@@ -47,15 +48,16 @@ class Grep(PluginBase, Observer):
             return
         ts = output['ts']
         user_id = output['user']
-        #user_name = slack_helpers.get_user(user_id)
+        user_name = slack_helpers.get_user(user_id)
         channel_id = output['channel']
+        channel_name = slack_helpers.get_channel(channel_id)
         line = output['text']
         query = table.insert().values(
             ts=ts,
             user_id=user_id,
-            user_name=user_id,
+            user_name=user_name,
             channel_id=channel_id,
-            channel_name=channel_id,
+            channel_name=channel_name,
             line=line,
         )
         database.db.execute(query)
@@ -63,7 +65,7 @@ class Grep(PluginBase, Observer):
 
     @staticmethod
     def grep(channel, text):
-        query = select([table.c.ts, table.c.user_id, table.c.line]) \
+        query = select([table.c.ts, table.c.user_name, table.c.line]) \
                        .where(table.c.line.like("%{}%".format(text))) \
                        .order_by(desc(table.c.ts)) \
                        .limit(50)
@@ -74,9 +76,11 @@ class Grep(PluginBase, Observer):
 
         for row in lines:
             if not re.match("^,grep .*", row.line):
-                template += '*{}* | {}: {}\n'
-                data.append(row.ts)
-                data.append(row.user_id)
+                template += '{} | {}: {}\n'
+                epoch = datetime.datetime.fromtimestamp(row.ts)
+                friendly_time = epoch.strftime('%Y-%m-%d %H:%M:%S')
+                data.append(friendly_time)
+                data.append(row.user_name)
                 data.append(row.line)
 
         template += '```'
