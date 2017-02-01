@@ -10,7 +10,6 @@ class Hello(PluginBase, Observer):
                        patterns=(
                           ('^hello!$', 'say_hello_world'),
                           ('^ni!$', 'say_ni'),
-                          ('.*brian.*', 'say_brian')
                        )):
         super(self.__class__, self).__init__(command=command, patterns=patterns)
         Observer.__init__(self)
@@ -23,8 +22,6 @@ class Hello(PluginBase, Observer):
             self.say_hello_world(channel)
         elif re.match('^ni!$', pattern):
             self.say_ni(channel)
-        elif re.match('.*brian.*', pattern):
-            self.say_brian(channel)
 
     @staticmethod
     def say_hello_world(channel):
@@ -35,8 +32,3 @@ class Hello(PluginBase, Observer):
     def say_ni(channel):
         slack_client.api_call("chat.postMessage", channel=channel,
                               text='We are the Knights who say..... "Ni"!', as_user=True)
-
-    @staticmethod
-    def say_brian(channel):
-        slack_client.api_call("chat.postMessage", channel=channel,
-                              text='His name is Bri-an', as_user=True)

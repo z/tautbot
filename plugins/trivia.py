@@ -82,10 +82,11 @@ class Trivia(PluginBase, Observer):
 
         self.current = next_question
         answer = self.current['answer']
-        answer.replace('\\', '').replace('\"', '').replace("\'", "")
+        answer = answer.replace('\\', '').replace('\"', '').replace("\'", "")
         answer = answer.lower().strip()
         answer = re.sub(r'\s{2,}|\.{2,}', ' ', answer)
         answer = re.sub(r'^"|<.*?>|\(.*?\)|^an? |^(the )?|"$', '', answer)
+        answer = answer.strip()
         self.current['answer'] = answer
 
         return self.current
@@ -120,7 +121,12 @@ class Trivia(PluginBase, Observer):
 
     def think(self, output, channel):
         if self.current:
+
             current_answer = self.current['answer']
+
+            if 'user' not in output:  # this happened
+                return
+
             user_id = output['user']
 
             if current_answer == output['text'].lower().strip():
@@ -134,7 +140,7 @@ class Trivia(PluginBase, Observer):
                                        .where(table.c.channel == channel)).fetchone()
 
                     if score:
-                        score = score[0]
+                        score = int(score[0])
                         score += 1
                         self.db_update(user_id, score, name, channel)
                     else:
@@ -164,8 +170,7 @@ class Trivia(PluginBase, Observer):
         query = table.update() \
             .where(table.c.id == user_id) \
             .where(table.c.channel == channel) \
-            .where(table.c.name == name) \
-            .values(score=score)
+            .values(name=name, score=score)
         database.db.execute(query)
         database.db.commit()
 
