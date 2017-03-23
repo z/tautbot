@@ -92,4 +92,8 @@ Reference other plugins for more examples.
 
 ## Credits
 
-Many ideas, and plugins adapted from CloudBot
+Many ideas, and plugins adapted from [CloudBot](https://github.com/CloudBotIRC/CloudBot)
+
+## License
+
+GNU GENERAL PUBLIC LICENSE, Version 3
