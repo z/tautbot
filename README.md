@@ -13,7 +13,9 @@ tickrate = 1
 
 bot_id = xxxxxxxxx
 slack_bot_token = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# https://developers.giphy.com/
 giphy_api_key = xxxxxxxxx
+# https://openweathermap.org/
 weather_api_key = xxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
