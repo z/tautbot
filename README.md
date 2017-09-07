@@ -1,6 +1,8 @@
 # tautbot
 
-A bot for Slack
+A bot for Slack.
+
+Get your ID and Token here by creating a new app: https://api.slack.com/apps
 
 Create a `tautbot.ini` file with the following content, substituting the placeholders for their real values:
 
